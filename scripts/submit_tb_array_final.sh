@@ -28,7 +28,7 @@ FASTERQDUMP=$ENV/fasterq-dump
 WORK=$PROJECT_ROOT/tb_pipeline
 REF=$WORK/reference/H37Rv.fasta
 ADAPTERS=$WORK/trimmomatic_adapters/All_Illumina_Adapters.fa
-SAMPLE_LIST=$PROJECT_ROOT/tb_pipeline/data/slurm_sample_list.tsv
+SAMPLE_LIST=$PROJECT_ROOT/tb_pipeline/data/missing_sample_list.tsv
 VCF_DIR=$WORK/05_filtered_vcfs
 QC_DIR=$WORK/01_raw_QC
 PROGRESS=$WORK/data/slurm_progress.csv
@@ -61,10 +61,10 @@ trap cleanup EXIT
 
 echo "$LOG [1/7] Downloading $SRA..."
 for attempt in 1 2 3; do
-    $PREFETCH $SRA -O $SCRATCH --max-size 50G >/dev/null 2>&1
+    $PREFETCH $SRA -O $SCRATCH --max-size 50G >> logs/${SAMPLE}_prefetch.log 2>&1
     if [ -d "$SCRATCH/$SRA" ]; then
         $FASTERQDUMP $SCRATCH/$SRA -O $SCRATCH \
-            --split-files --force --threads $THREADS >/dev/null 2>&1
+            --split-files --force --threads $THREADS >> logs/${SAMPLE}_fasterqdump.log 2>&1
         if ls $SCRATCH/*.fastq 2>/dev/null | grep -q .; then
             for fq in $SCRATCH/*.fastq; do gzip -1 "$fq" & done
             wait
@@ -159,7 +159,7 @@ $GATK --java-options "$JAVA_MEM" HaplotypeCaller \
     --native-pair-hmm-threads $THREADS \
     --minimum-mapping-quality 20 \
     --min-base-quality-score 20 \
-    >/dev/null 2>&1
+    >> logs/${SAMPLE}_haplotypecaller.log 2>&1
 rm -f $DEDUP ${DEDUP%.bam}.bai $METRICS
 echo "$LOG Dedup BAM deleted."
 
@@ -173,7 +173,7 @@ $GATK VariantFiltration \
     --filter-name "HighFS"  --filter-expression "FS > 60.0" \
     --filter-name "LowMQ"   --filter-expression "MQ < 40.0" \
     --filter-name "HighSOR" --filter-expression "SOR > 3.0" \
-    >/dev/null 2>&1
+    >> logs/${SAMPLE}_variantfiltration.log 2>&1
 rm -f $RAW_VCF ${RAW_VCF}.idx
 
 if [ ! -s "$FINAL_VCF" ]; then

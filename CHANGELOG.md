@@ -23,3 +23,7 @@
 - A subset of filtered VCFs used chromosome naming incompatible with
   TB-Profiler; resolved by renaming contigs (bcftools annotate
   --rename-chrs) into 05_renamed_vcfs/ before profiling (finish_remaining.sh)
+- Download steps (prefetch, fasterq-dump) also redirected errors to
+  /dev/null, in addition to the GATK steps already fixed; this meant
+  download failures left no trace in SLURM logs either. All four
+  redirects now write to per-sample log files under logs/.
