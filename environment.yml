@@ -1,0 +1,13 @@
+name: tb_pipeline
+channels: [bioconda, conda-forge]
+dependencies:
+  - python=3.10
+  - pandas=2.2
+  - numpy=1.26
+  - bwa=0.7.19
+  - samtools=1.24
+  - gatk4=4.6.2.0
+  - trimmomatic=0.39
+  - fastqc
+  - sra-tools=3.2.0
+  - openjdk=17

@@ -1,0 +1,7 @@
+*.vcf.gz
+*.bam
+*.fastq.gz
+*.sra
+tmp/
+logs/
+__pycache__/
